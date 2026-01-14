@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "362220553943",
+    "project_id": "perizinan-santri",
+    "storage_bucket": "perizinan-santri.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362220553943:android:4b743a9c56f5c0f71b5292",
+        "android_client_info": {
+          "package_name": "com.example.perizinan_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwejXF1q2xfOAoz__fmtqiOeDHJYqXG4E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
