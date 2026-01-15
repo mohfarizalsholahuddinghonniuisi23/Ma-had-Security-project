@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:perizinan_santri/Views/HomeKeamanan.dart';
 import 'firebase_options.dart';
 import 'screens/test_firestore_screen.dart';
-import 'Views/formkeamanan.dart';
+import 'Views/HomeKeamanan.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
       ),
       // home: const TestFirestoreScreen(),
       // debugShowCheckedModeBanner: false,
-      home: const formkeamanan(),
+      home: const HomeKeamanan(),
       debugShowCheckedModeBanner: false,
     );
   }
