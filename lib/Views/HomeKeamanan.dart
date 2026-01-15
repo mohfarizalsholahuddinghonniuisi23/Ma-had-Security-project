@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:perizinan_santri/Views/FormIzinPulang.dart';
 
 class HomeKeamanan extends StatefulWidget {
   const HomeKeamanan({super.key});
@@ -77,7 +78,15 @@ class _HomeKeamananState extends State<HomeKeamanan> {
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.orange),
               title: const Text('Izin Pulang'),
-              onTap: () => _handleMenuSelection('Izin Pulang'),
+              onTap: () {
+                Navigator.pop(context); // Tutup drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FormIzinPulang(),
+                  ),
+                );
+              },
             ),
             // Menu Izin Kembali
             ListTile(
