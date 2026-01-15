@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/test_firestore_screen.dart';
+import 'Views/formkeamanan.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +25,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      home: const TestFirestoreScreen(),
+      // home: const TestFirestoreScreen(),
+      // debugShowCheckedModeBanner: false,
+      home: const formkeamanan(),
       debugShowCheckedModeBanner: false,
     );
   }
