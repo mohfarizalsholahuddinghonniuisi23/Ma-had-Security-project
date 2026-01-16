@@ -41,12 +41,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyALYheFEoOMMBJPlYD2bnTABTCZDZ06ad0',
-    appId: '1:362220553943:web:2dce0a1c746cac111b5292',
+    apiKey: 'AIzaSyALYheFFcOMMBJP1YD2bnTABTCZDZ0GadQ',
+    appId: '1:362220553943:web:c812711dc8e66d7f1b5292',
     messagingSenderId: '362220553943',
     projectId: 'perizinan-santri',
-    authDomain: 'perizinan-santri.firebaseapp.com',
-    storageBucket: 'perizinan-santri.firebasestorage.app',
+    authDomain: 'perizinan-santri.firebaseapp. com',
+    storageBucket: 'perizinan-santri.firebasestorage. app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
