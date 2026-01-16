@@ -45,8 +45,8 @@ class DefaultFirebaseOptions {
     appId: '1:362220553943:web:c812711dc8e66d7f1b5292',
     messagingSenderId: '362220553943',
     projectId: 'perizinan-santri',
-    authDomain: 'perizinan-santri.firebaseapp. com',
-    storageBucket: 'perizinan-santri.firebasestorage. app',
+    authDomain: 'perizinan-santri.firebaseapp.com',
+    storageBucket: 'perizinan-santri.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
