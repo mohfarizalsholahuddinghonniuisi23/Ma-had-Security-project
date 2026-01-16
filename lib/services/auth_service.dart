@@ -48,7 +48,7 @@ class AuthService {
 
       return credential;
     } on FirebaseAuthException catch (e) {
-      print('❌ Login gagal: ${e.message}');
+      print('❌ Login gagal (FirebaseAuthException): ${e.code} - ${e.message}');
       print('═══════════════════════════════════════════════════════════');
 
       // Terjemahkan pesan error ke Bahasa Indonesia
@@ -73,6 +73,28 @@ class AuthService {
           pesanError = e.message ?? 'Terjadi kesalahan';
       }
       throw Exception(pesanError);
+    } catch (e) {
+      // Tangkap error lainnya (untuk Flutter Web)
+      print('❌ Login gagal (General Error): $e');
+      print('🔍 Error type: ${e.runtimeType}');
+      print('═══════════════════════════════════════════════════════════');
+
+      String errorString = e.toString().toLowerCase();
+
+      // Parse error message untuk Flutter Web
+      if (errorString.contains('user-not-found')) {
+        throw Exception('Email tidak terdaftar');
+      } else if (errorString.contains('wrong-password')) {
+        throw Exception('Password salah');
+      } else if (errorString.contains('invalid-credential')) {
+        throw Exception('Email atau password salah');
+      } else if (errorString.contains('invalid-email')) {
+        throw Exception('Format email tidak valid');
+      } else if (errorString.contains('network')) {
+        throw Exception('Tidak ada koneksi internet');
+      } else {
+        throw Exception('Login gagal. Periksa email dan password Anda.');
+      }
     }
   }
 

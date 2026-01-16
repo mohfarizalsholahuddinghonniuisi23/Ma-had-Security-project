@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyALYheFFcOMMBJP1YD2bnTABTCZDZ0GadQ',
+    apiKey: 'AIzaSyALYheFEoOMMBJPlYD2bnTABTCZDZ06ad0',
     appId: '1:362220553943:web:c812711dc8e66d7f1b5292',
     messagingSenderId: '362220553943',
     projectId: 'perizinan-santri',
