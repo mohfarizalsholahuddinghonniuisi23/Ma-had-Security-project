@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:perizinan_santri/Views/FormIzinPulang.dart';
 import 'package:perizinan_santri/services/auth_service.dart';
+import 'package:perizinan_santri/screens/login_screen.dart';
 
 class HomeKeamanan extends StatefulWidget {
   const HomeKeamanan({super.key});
@@ -21,7 +22,6 @@ class _HomeKeamananState extends State<HomeKeamanan> {
       SnackBar(content: Text('Menu $menu dipilih')),
     );
   }
-
   // Fungsi untuk logout
   Future<void> _logout() async {
     // Tampilkan dialog konfirmasi
@@ -49,10 +49,19 @@ class _HomeKeamananState extends State<HomeKeamanan> {
 
     if (confirm == true) {
       await _authService.logout();
-      // Tidak perlu navigate manual, AuthWrapper akan handle otomatis
+      
+      // Navigate ke halaman login dan hapus semua route sebelumnya
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+          (route) => false, // Hapus semua route sebelumnya
+        );
+      }
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     // Ambil info user yang sedang login
