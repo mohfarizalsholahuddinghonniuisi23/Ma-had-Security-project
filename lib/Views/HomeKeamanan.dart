@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:perizinan_santri/Views/FormIzinPulang.dart';
+import 'package:perizinan_santri/services/auth_service.dart';
 
 class HomeKeamanan extends StatefulWidget {
   const HomeKeamanan({super.key});
@@ -9,7 +11,8 @@ class HomeKeamanan extends StatefulWidget {
 }
 
 class _HomeKeamananState extends State<HomeKeamanan> {
-  int _selectedIndex = 0;
+  // Service untuk logout
+  final AuthService _authService = AuthService();
 
   // Fungsi untuk handle menu sidebar
   void _handleMenuSelection(String menu) {
@@ -19,16 +22,56 @@ class _HomeKeamananState extends State<HomeKeamanan> {
     );
   }
 
+  // Fungsi untuk logout
+  Future<void> _logout() async {
+    // Tampilkan dialog konfirmasi
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Konfirmasi Logout'),
+        content: const Text('Apakah Anda yakin ingin keluar?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
 
+    if (confirm == true) {
+      await _authService.logout();
+      // Tidak perlu navigate manual, AuthWrapper akan handle otomatis
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Ambil info user yang sedang login
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home Keamanan'),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         elevation: 2,
+        actions: [
+          // Tombol Logout di AppBar
+          IconButton(
+            onPressed: _logout,
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+          ),
+        ],
       ),
 
       // Sidebar Drawer
@@ -36,7 +79,7 @@ class _HomeKeamananState extends State<HomeKeamanan> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            // Header Drawer
+            // Header Drawer dengan info user
             DrawerHeader(
               decoration: const BoxDecoration(
                 color: Colors.teal,
@@ -55,11 +98,11 @@ class _HomeKeamananState extends State<HomeKeamanan> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    'Sistem Keamanan',
-                    style: TextStyle(
+                  Text(
+                    user?.email ?? 'Petugas Keamanan',
+                    style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -93,7 +136,19 @@ class _HomeKeamananState extends State<HomeKeamanan> {
               leading: const Icon(Icons.login, color: Colors.teal),
               title: const Text('Izin Kembali'),
               onTap: () => _handleMenuSelection('Izin Kembali'),
-            ),         
+            ),
+
+            const Divider(),
+
+            // Menu Logout
+            ListTile(
+              leading: const Icon(Icons.exit_to_app, color: Colors.red),
+              title: const Text('Logout', style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context); // Tutup drawer dulu
+                _logout();
+              },
+            ),
           ],
         ),
       ),
@@ -128,8 +183,6 @@ class _HomeKeamananState extends State<HomeKeamanan> {
           ],
         ),
       ),
-
-      
     );
   }
 }
