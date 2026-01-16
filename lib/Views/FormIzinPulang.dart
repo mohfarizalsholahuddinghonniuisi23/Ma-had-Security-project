@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../models/izin_pulang.dart';
+import '../services/izin_service.dart';
 
 class FormIzinPulang extends StatefulWidget {
   const FormIzinPulang({super.key});
@@ -14,7 +17,16 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
   final _alamatController = TextEditingController();
   final _noTelpWaliController = TextEditingController();
   final _alasanController = TextEditingController();
-  
+
+  // Service untuk Firestore
+  final IzinService _izinService = IzinService();
+
+  // State untuk loading
+  bool _isLoading = false;
+
+  // Tanggal pulang
+  DateTime? _tanggalPulang;
+
   String? _selectedStatus;
   final List<String> _statusOptions = ['Belum Disetujui', 'Disetujui'];
 
@@ -28,26 +40,89 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
     super.dispose();
   }
 
-  void _simpanData() {
+  // Fungsi untuk pilih tanggal
+  Future<void> _pilihTanggal() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _tanggalPulang ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      helpText: 'Pilih Tanggal Pulang',
+      cancelText: 'Batal',
+      confirmText: 'Pilih',
+    );
+
+    if (picked != null && picked != _tanggalPulang) {
+      setState(() {
+        _tanggalPulang = picked;
+      });
+    }
+  }
+
+  // Fungsi simpan ke Firestore
+  Future<void> _simpanData() async {
     if (_formKey.currentState!.validate()) {
-      if (_selectedStatus == null) {
+      // Validasi tanggal
+      if (_tanggalPulang == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Silakan pilih status izin'),
+            content: Text('Silakan pilih tanggal pulang'),
             backgroundColor: Colors.orange,
           ),
         );
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Data izin pulang berhasil disimpan!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // Set loading
+      setState(() {
+        _isLoading = true;
+      });
 
-      _resetForm();
+      try {
+        // Buat object IzinPulang dari form
+        final izinBaru = IzinPulang(
+          namaSantri: _namaController.text.trim(),
+          nis: _nisController.text.trim(),
+          alamat: _alamatController.text.trim(),
+          noTelpWali: _noTelpWaliController.text.trim(),
+          alasan: _alasanController.text.trim(),
+          status: _selectedStatus ?? 'Belum Disetujui',
+          tanggalPulang: _tanggalPulang!,
+        );
+
+        // Simpan ke Firestore
+        await _izinService.tambahIzinPulang(izinBaru);
+
+        // Tampilkan pesan sukses
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Data izin pulang berhasil disimpan!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Reset form
+          _resetForm();
+        }
+      } catch (e) {
+        // Tampilkan pesan error
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ Gagal menyimpan: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        // Matikan loading
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
     }
   }
 
@@ -60,6 +135,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
     _alasanController.clear();
     setState(() {
       _selectedStatus = null;
+      _tanggalPulang = null;
     });
   }
 
@@ -220,6 +296,36 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
               ),
               const SizedBox(height: 16),
 
+              // 📅 Date Picker untuk Tanggal Pulang
+              InkWell(
+                onTap: _pilihTanggal,
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Tanggal Pulang',
+                    prefixIcon: Icon(Icons.calendar_today),
+                    border: OutlineInputBorder(),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _tanggalPulang != null
+                            ? DateFormat('dd MMMM yyyy', 'id_ID')
+                                .format(_tanggalPulang!)
+                            : 'Pilih tanggal pulang',
+                        style: TextStyle(
+                          color: _tanggalPulang != null
+                              ? Colors.black
+                              : Colors.grey,
+                        ),
+                      ),
+                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // Input Alasan
               TextFormField(
                 controller: _alasanController,
@@ -286,11 +392,20 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
               ),
               const SizedBox(height: 24),
 
-              // Tombol Simpan
+              // Tombol Simpan dengan Loading
               ElevatedButton.icon(
-                onPressed: _simpanData,
-                icon: const Icon(Icons.save),
-                label: const Text('Simpan Data'),
+                onPressed: _isLoading ? null : _simpanData,
+                icon: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.save),
+                label: Text(_isLoading ? 'Menyimpan...' : 'Simpan Data'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,
