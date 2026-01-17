@@ -27,6 +27,9 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
   // Tanggal pulang
   DateTime? _tanggalPulang;
 
+  // Taggal kembali 
+  DateTime? _tanggalKembali;
+
   String? _selectedStatus;
   final List<String> _statusOptions = ['Belum Disetujui', 'Disetujui'];
 
@@ -55,6 +58,36 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
     if (picked != null && picked != _tanggalPulang) {
       setState(() {
         _tanggalPulang = picked;
+      });
+    }
+  }
+
+  // Fungsi untuk pilih tanggal kembali
+  Future<void> _pilihTanggalKembali() async {
+    // Validasi: tanggal pulang harus dipilih dulu
+    if (_tanggalPulang == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('⚠️ Pilih tanggal pulang terlebih dahulu'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _tanggalKembali ?? _tanggalPulang!.add(const Duration(days: 1)),
+      firstDate: _tanggalPulang!, // Minimal setelah tanggal pulang
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      helpText: 'Pilih Tanggal Kembali',
+      cancelText: 'Batal',
+      confirmText: 'Pilih',
+    );
+
+    if (picked != null && picked != _tanggalKembali) {
+      setState(() {
+        _tanggalKembali = picked;
       });
     }
   }
@@ -88,6 +121,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
           alasan: _alasanController.text.trim(),
           status: _selectedStatus ?? 'Belum Disetujui',
           tanggalPulang: _tanggalPulang!,
+          tanggalKembali: _tanggalKembali,
         );
 
         // Simpan ke Firestore
@@ -136,6 +170,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
     setState(() {
       _selectedStatus = null;
       _tanggalPulang = null;
+      _tanggalKembali = null;
     });
   }
 
@@ -320,6 +355,54 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
                         ),
                       ),
                       const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 📅 Date Picker untuk Tanggal Kembali
+              InkWell(
+                onTap: _pilihTanggalKembali,
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Tanggal Kembali (Opsional)',
+                    prefixIcon: Icon(Icons.event_available),
+                    border: OutlineInputBorder(),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _tanggalKembali != null
+                            ? DateFormat('dd MMMM yyyy', 'id_ID')
+                                .format(_tanggalKembali!)
+                            : 'Pilih tanggal kembali (opsional)',
+                        style: TextStyle(
+                          color: _tanggalKembali != null
+                              ? Colors.black
+                              : Colors.grey,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          if (_tanggalKembali != null)
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _tanggalKembali = null;
+                                });
+                              },
+                              child: const Icon(
+                                Icons.clear,
+                                color: Colors.red,
+                                size: 20,
+                              ),
+                            ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                        ],
+                      ),
                     ],
                   ),
                 ),
