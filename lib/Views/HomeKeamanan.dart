@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:perizinan_santri/Views/FormIzinPulang.dart';
 import 'package:perizinan_santri/services/auth_service.dart';
-import 'package:perizinan_santri/screens/login_screen.dart';
+import 'package:perizinan_santri/Views/login.dart';
 
 class HomeKeamanan extends StatefulWidget {
   const HomeKeamanan({super.key});

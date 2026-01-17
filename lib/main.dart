@@ -3,7 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:perizinan_santri/Views/HomeKeamanan.dart';
-import 'package:perizinan_santri/screens/login_screen.dart';
+import 'package:perizinan_santri/Views/login.dart';
+import 'package:perizinan_santri/Views/test_firestore.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -37,7 +38,8 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       // Gunakan StreamBuilder untuk cek status login
-      home: const AuthWrapper(),
+       home: const AuthWrapper(),
+      
     );
   }
 }
