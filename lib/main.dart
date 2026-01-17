@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:perizinan_santri/Views/HomeKeamanan.dart';
 import 'package:perizinan_santri/Views/login.dart';
 import 'package:perizinan_santri/Views/test_firestore.dart';
+import 'package:perizinan_santri/Views/HomePengurus.dart';
 import 'firebase_options.dart';
 
 void main() async {
