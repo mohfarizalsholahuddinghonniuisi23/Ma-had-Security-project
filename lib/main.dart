@@ -6,7 +6,6 @@ import 'package:perizinan_santri/Views/HomeKeamanan.dart';
 import 'package:perizinan_santri/Views/login.dart';
 // import 'package:perizinan_santri/Views/test_firestore.dart';
 import 'package:perizinan_santri/Views/HomePengurus.dart';
-import 'package:perizinan_santri/Views/AdminCreateUserPage.dart';
 import 'firebase_options.dart';
 
 void main() async {
