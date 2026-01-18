@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../Views/HomeKeamanan.dart';
+import '../Views/HomePengurus.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -56,25 +58,84 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       // 3️⃣ Panggil AuthService untuk login
-      await _authService.login(
+      final credential = await _authService.login(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
-      // 4️⃣ Jika berhasil, pindah ke HomeKeamanan
+      // 4️⃣ Ambil role user dari Firestore
+      String? role;
+      final userEmail = credential.user?.email ?? '';
+      
+      try {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(credential.user?.uid)
+            .get();
+        
+        if (snapshot.exists && snapshot.data()?['role'] != null) {
+          role = snapshot.data()?['role'] as String?;
+          print('✅ Role dari Firestore: $role');
+        } else {
+          // Role tidak ada di Firestore, tentukan dari email
+          print('ℹ️ Role tidak ditemukan di Firestore, mendeteksi dari email...');
+          
+          if (userEmail.contains('keamanan')) {
+            role = 'keamanan';
+          } else if (userEmail.contains('pengurus')) {
+            role = 'pengurus';
+          }
+          
+          // Simpan role ke Firestore untuk login berikutnya
+          if (role != null) {
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(credential.user?.uid)
+                .set({
+              'email': userEmail,
+              'name': role == 'keamanan' ? 'Admin Keamanan' : 'Admin Pengurus',
+              'role': role,
+              'createdAt': FieldValue.serverTimestamp(),
+            }, SetOptions(merge: true));
+            print('✅ Role "$role" disimpan ke Firestore');
+          }
+        }
+      } catch (e) {
+        print('⚠️ Error fetching role: $e');
+        // Fallback: tentukan dari email
+        if (userEmail.contains('keamanan')) {
+          role = 'keamanan';
+        } else if (userEmail.contains('pengurus')) {
+          role = 'pengurus';
+        }
+      }
+
+      // 5️⃣ Arahkan ke dashboard sesuai role
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeKeamanan()),
-        );
+        if (role == 'keamanan') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeKeamanan()),
+          );
+        } else if (role == 'pengurus') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomePengurus()),
+          );
+        } else {
+          // Jika role tidak dikenali, tampilkan error
+          setState(() {
+            _errorMessage = 'Role user tidak dikenali. Gunakan email dengan kata "keamanan" atau "pengurus".';
+          });
+        }
       }
     } catch (e) {
-      // 5️⃣ Jika gagal, tampilkan error
+      // 6️⃣ Jika gagal, tampilkan error
       setState(() {
         _errorMessage = e.toString().replaceAll('Exception: ', '');
       });
     } finally {
-      // 6️⃣ Matikan loading
+      // 7️⃣ Matikan loading
       if (mounted) {
         setState(() {
           _isLoading = false;

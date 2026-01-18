@@ -6,6 +6,7 @@ import 'package:perizinan_santri/Views/HomeKeamanan.dart';
 import 'package:perizinan_santri/Views/login.dart';
 // import 'package:perizinan_santri/Views/test_firestore.dart';
 import 'package:perizinan_santri/Views/HomePengurus.dart';
+import 'package:perizinan_santri/Views/AdminCreateUserPage.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -38,9 +39,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      // Gunakan StreamBuilder untuk cek status login
-       home: const HomePengurus(),
-      
+      // Gunakan AuthWrapper untuk cek status login
+      home: const LoginScreen(),
     );
   }
 }
