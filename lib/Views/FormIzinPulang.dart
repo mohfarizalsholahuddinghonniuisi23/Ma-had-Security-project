@@ -39,9 +39,6 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
   // Taggal kembali 
   DateTime? _tanggalKembali;
 
-  String? _selectedStatus;
-  final List<String> _statusOptions = ['Belum Disetujui', 'Disetujui'];
-
   @override
   void dispose() {
     _namaController.dispose();
@@ -136,7 +133,8 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
           alamat: _alamatController.text.trim(),
           noTelpWali: _noTelpWaliController.text.trim(),
           alasan: _alasanController.text.trim(),
-          status: _selectedStatus ?? 'Belum Disetujui',
+          status: 'Belum Disetujui',
+          statusSantri: 'Pulang', // Otomatis set status santri = Pulang
           tanggalPulang: _tanggalPulang!,
           tanggalKembali: _tanggalKembali,
           fotoBase64: fotoBase64,
@@ -186,7 +184,6 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
     _noTelpWaliController.clear();
     _alasanController.clear();
     setState(() {
-      _selectedStatus = null;
       _tanggalPulang = null;
       _tanggalKembali = null;
       _selectedImage = null;
@@ -354,34 +351,6 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
                   }
                   if (value.length < 10) {
                     return 'No. telepon minimal 10 digit';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Dropdown Status
-              DropdownButtonFormField<String>(
-                value: _selectedStatus,
-                decoration: const InputDecoration(
-                  labelText: 'Status Izin',
-                  prefixIcon: Icon(Icons.category),
-                  border: OutlineInputBorder(),
-                ),
-                items: _statusOptions.map((String status) {
-                  return DropdownMenuItem<String>(
-                    value: status,
-                    child: Text(status),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedStatus = newValue;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Silakan pilih status izin';
                   }
                   return null;
                 },
