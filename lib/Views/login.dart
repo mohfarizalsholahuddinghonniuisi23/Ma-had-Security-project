@@ -156,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // ══════════════════════════════════════════
-                  // 🔒 ICON & JUDUL
+                  // 🔒 LOGO & JUDUL
                   // ══════════════════════════════════════════
                   Container(
                     padding: const EdgeInsets.all(20),
@@ -164,10 +164,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.teal,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.security,
-                      size: 60,
-                      color: Colors.white,
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/logo aplikasi.png',
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Jika gambar tidak ditemukan, tampilkan icon default
+                          return const Icon(
+                            Icons.security,
+                            size: 60,
+                            color: Colors.white,
+                          );
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),

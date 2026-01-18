@@ -43,3 +43,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  # Assets untuk gambar, logo, dll
+  assets:
+    - assets/images/
