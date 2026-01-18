@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:perizinan_santri/Views/login.dart';
@@ -106,6 +108,45 @@ class _HomePengurusState extends State<HomePengurus> {
     );
   }
 
+  // Fungsi lihat foto detail
+  void _showFotoDetail(String nama, String base64Foto) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppBar(
+              title: Text('Foto: $nama'),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.black,
+            ),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 500),
+              child: SingleChildScrollView(
+                child: Image.memory(
+                  base64Decode(base64Foto),
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => 
+                    const Center(child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text('Gagal memuat foto'),
+                    )),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -157,14 +198,19 @@ class _HomePengurusState extends State<HomePengurus> {
                   CircleAvatar(
                     radius: 25,
                     backgroundColor: statusColor.withOpacity(0.2),
-                    child: Text(
-                      izin.namaSantri[0].toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
-                      ),
-                    ),
+                    backgroundImage: izin.fotoBase64 != null 
+                        ? MemoryImage(base64Decode(izin.fotoBase64!)) 
+                        : null,
+                    child: izin.fotoBase64 == null 
+                        ? Text(
+                            izin.namaSantri[0].toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: statusColor,
+                            ),
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -255,6 +301,27 @@ class _HomePengurusState extends State<HomePengurus> {
                   ),
                 ],
               ),
+              // Tombol lihat foto jika ada
+              if (izin.fotoBase64 != null) ...[
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () => _showFotoDetail(izin.namaSantri, izin.fotoBase64!),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.image, size: 16, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Lihat Foto Bukti',
+                        style: TextStyle(
+                          fontSize: 13, 
+                          color: Colors.blue[700],
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

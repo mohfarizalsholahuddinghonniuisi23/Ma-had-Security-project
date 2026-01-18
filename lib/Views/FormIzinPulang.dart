@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'dart:typed_data';
+import 'dart:convert';
 import 'package:perizinan_santri/models/izin_pulang.dart';
 import 'package:perizinan_santri/services/izin_service.dart';
 
@@ -28,7 +30,8 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
 
   // Image picker
   final ImagePicker _picker = ImagePicker();
-  File? _selectedImage;
+  XFile? _selectedImage;
+  Uint8List? _selectedImageBytes; // Untuk Flutter Web
 
   // Tanggal pulang
   DateTime? _tanggalPulang;
@@ -118,6 +121,14 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
       });
 
       try {
+        String? fotoBase64;
+        
+        // Konversi foto ke base64 jika ada
+        if (_selectedImage != null && _selectedImageBytes != null) {
+          fotoBase64 = base64Encode(_selectedImageBytes!);
+          print('✅ Foto dikonversi ke base64 (${(fotoBase64.length / 1024).toStringAsFixed(1)} KB)');
+        }
+        
         // Buat object IzinPulang dari form
         final izinBaru = IzinPulang(
           namaSantri: _namaController.text.trim(),
@@ -128,6 +139,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
           status: _selectedStatus ?? 'Belum Disetujui',
           tanggalPulang: _tanggalPulang!,
           tanggalKembali: _tanggalKembali,
+          fotoBase64: fotoBase64,
         );
 
         // Simpan ke Firestore
@@ -178,6 +190,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
       _tanggalPulang = null;
       _tanggalKembali = null;
       _selectedImage = null;
+      _selectedImageBytes = null;
     });
   }
 
@@ -185,21 +198,23 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
   Future<void> _ambilFoto() async {
     try {
       final XFile? photo = await _picker.pickImage(
-        source: ImageSource.camera,
+        source: kIsWeb ? ImageSource.gallery : ImageSource.camera,
         maxWidth: 1920,
         maxHeight: 1080,
         imageQuality: 85,
       );
 
       if (photo != null) {
+        final bytes = await photo.readAsBytes();
         setState(() {
-          _selectedImage = File(photo.path);
+          _selectedImage = photo;
+          _selectedImageBytes = bytes;
         });
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('✅ Foto berhasil diambil!'),
+              content: Text('✅ Foto berhasil dipilih!'),
               backgroundColor: Colors.green,
               duration: Duration(seconds: 2),
             ),
@@ -222,6 +237,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
   void _hapusFoto() {
     setState(() {
       _selectedImage = null;
+      _selectedImageBytes = null;
     });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -482,14 +498,14 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
                 ),
                 child: Column(
                   children: [
-                    if (_selectedImage != null) ...[
+                    if (_selectedImage != null && _selectedImageBytes != null) ...[
                       // Preview foto yang diambil
                       Stack(
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: Image.file(
-                              _selectedImage!,
+                            child: Image.memory(
+                              _selectedImageBytes!,
                               height: 250,
                               width: double.infinity,
                               fit: BoxFit.cover,

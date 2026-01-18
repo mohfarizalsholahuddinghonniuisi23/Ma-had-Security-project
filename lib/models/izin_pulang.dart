@@ -9,8 +9,15 @@ class IzinPulang {
   final String alasan;
   final String status; // "Belum Disetujui" / "Disetujui"
   final DateTime tanggalPulang;
-  final DateTime? tanggalKembali;
+  final DateTime? tanggalKembali; // Rencana tanggal kembali
   final DateTime createdAt;
+  
+  // Field baru untuk verifikasi kembali
+  final bool sudahKembali;
+  final DateTime? tanggalVerifikasiKembali; // Tanggal aktual santri kembali
+  
+  // Field untuk foto bukti
+  final String? fotoBase64;
 
   IzinPulang({
     this.id,
@@ -23,7 +30,28 @@ class IzinPulang {
     required this.tanggalPulang,
     this.tanggalKembali,
     DateTime? createdAt,
+    this.sudahKembali = false,
+    this.tanggalVerifikasiKembali,
+    this.fotoBase64,
   }) : createdAt = createdAt ?? DateTime.now();
+
+  // Cek apakah santri terlambat kembali
+  bool isTerlambat() {
+    if (tanggalKembali == null) return false;
+    if (sudahKembali && tanggalVerifikasiKembali != null) {
+      // Bandingkan tanggal verifikasi dengan rencana kembali
+      return tanggalVerifikasiKembali!.isAfter(tanggalKembali!);
+    }
+    // Jika belum kembali, bandingkan dengan hari ini
+    final now = DateTime.now();
+    final batasKembali = DateTime(
+      tanggalKembali!.year,
+      tanggalKembali!.month,
+      tanggalKembali!.day,
+      23, 59, 59,
+    );
+    return now.isAfter(batasKembali);
+  }
 
   // Convert dari Firestore Document ke Object
   factory IzinPulang.fromFirestore(DocumentSnapshot doc) {
@@ -40,7 +68,14 @@ class IzinPulang {
       tanggalKembali: data['tanggalKembali'] != null
           ? (data['tanggalKembali'] as Timestamp).toDate()
           : null,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt: data['createdAt'] != null 
+          ? (data['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
+      sudahKembali: data['sudahKembali'] ?? false,
+      tanggalVerifikasiKembali: data['tanggalVerifikasiKembali'] != null
+          ? (data['tanggalVerifikasiKembali'] as Timestamp).toDate()
+          : null,
+      fotoBase64: data['fotoBase64'],
     );
   }
 
@@ -57,6 +92,11 @@ class IzinPulang {
       'tanggalKembali':
           tanggalKembali != null ? Timestamp.fromDate(tanggalKembali!) : null,
       'createdAt': Timestamp.fromDate(createdAt),
+      'sudahKembali': sudahKembali,
+      'tanggalVerifikasiKembali': tanggalVerifikasiKembali != null 
+          ? Timestamp.fromDate(tanggalVerifikasiKembali!) 
+          : null,
+      'fotoBase64': fotoBase64,
     };
   }
 
@@ -72,6 +112,9 @@ class IzinPulang {
     DateTime? tanggalPulang,
     DateTime? tanggalKembali,
     DateTime? createdAt,
+    bool? sudahKembali,
+    DateTime? tanggalVerifikasiKembali,
+    String? fotoBase64,
   }) {
     return IzinPulang(
       id: id ?? this.id,
@@ -84,11 +127,14 @@ class IzinPulang {
       tanggalPulang: tanggalPulang ?? this.tanggalPulang,
       tanggalKembali: tanggalKembali ?? this.tanggalKembali,
       createdAt: createdAt ?? this.createdAt,
+      sudahKembali: sudahKembali ?? this.sudahKembali,
+      tanggalVerifikasiKembali: tanggalVerifikasiKembali ?? this.tanggalVerifikasiKembali,
+      fotoBase64: fotoBase64 ?? this.fotoBase64,
     );
   }
 
   @override
   String toString() {
-    return 'IzinPulang(id: $id, namaSantri: $namaSantri, nis: $nis, status: $status)';
+    return 'IzinPulang(id: $id, namaSantri: $namaSantri, nis: $nis, status: $status, sudahKembali: $sudahKembali)';
   }
 }

@@ -29,6 +29,9 @@ dependencies:
   # Image Picker
   image_picker: ^1.0.7
   
+  # Firebase Storage (untuk upload foto)
+  firebase_storage: any
+  
   # UI
   cupertino_icons: ^1.0.2
 

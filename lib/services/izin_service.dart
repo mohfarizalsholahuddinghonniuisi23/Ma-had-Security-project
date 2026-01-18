@@ -91,6 +91,55 @@ class IzinService {
     }
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // 🆕 VERIFIKASI KEMBALI - Konfirmasi santri sudah kembali
+  // ═══════════════════════════════════════════════════════════
+  Future<void> verifikasiKembali(String id) async {
+    try {
+      await _firestore.collection(_collection).doc(id).update({
+        'sudahKembali': true,
+        'tanggalVerifikasiKembali': Timestamp.fromDate(DateTime.now()),
+      });
+      print('✅ Verifikasi kembali berhasil untuk ID: $id');
+    } catch (e) {
+      throw Exception('Gagal verifikasi kembali: $e');
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // 🆕 GET IZIN AKTIF - Izin yang disetujui & belum kembali
+  // ═══════════════════════════════════════════════════════════
+  Stream<List<IzinPulang>> getIzinAktif() {
+    // Simple query tanpa composite index - filter di app
+    return _firestore
+        .collection(_collection)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => IzinPulang.fromFirestore(doc))
+              .where((izin) => izin.status == 'Disetujui' && !izin.sudahKembali)
+              .toList();
+        });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // 🆕 GET RIWAYAT IZIN - Izin yang sudah selesai (sudah kembali)
+  // ═══════════════════════════════════════════════════════════
+  Stream<List<IzinPulang>> getRiwayatIzin() {
+    // Simple query tanpa composite index - filter di app
+    return _firestore
+        .collection(_collection)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => IzinPulang.fromFirestore(doc))
+              .where((izin) => izin.sudahKembali)
+              .toList();
+        });
+  }
+
   // DELETE - Hapus izin
   Future<void> hapusIzinPulang(String id) async {
     try {
@@ -113,13 +162,16 @@ class IzinService {
 
   // READ - Get izin yang belum kembali
   Stream<List<IzinPulang>> getIzinBelumKembali() {
+    // Simple query tanpa composite index - filter di app
     return _firestore
         .collection(_collection)
-        .where('status', isEqualTo: 'Disetujui')
-        .where('tanggalKembali', isNull: true)
-        .orderBy('tanggalPulang', descending: true)
+        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => IzinPulang.fromFirestore(doc)).toList());
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => IzinPulang.fromFirestore(doc))
+              .where((izin) => izin.status == 'Disetujui' && !izin.sudahKembali)
+              .toList();
+        });
   }
 }
