@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import '../Views/HomeKeamanan.dart';
-import '../Views/HomePengurus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:perizinan_santri/Views/HomeKeamanan.dart';
+import 'package:perizinan_santri/Views/HomePengurus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
