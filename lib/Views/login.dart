@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:perizinan_santri/Views/HomeKeamanan.dart';
-import 'package:perizinan_santri/Views/HomePengurus.dart';
+// import 'package:perizinan_santri/Views/HomeKeamanan.dart'; // Removed for named routes
+// import 'package:perizinan_santri/Views/HomePengurus.dart'; // Removed for named routes
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:perizinan_santri/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -113,15 +114,9 @@ class _LoginScreenState extends State<LoginScreen> {
       // 5️⃣ Arahkan ke dashboard sesuai role
       if (mounted) {
         if (role == 'keamanan') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeKeamanan()),
-          );
+          Navigator.pushReplacementNamed(context, '/keamanan');
         } else if (role == 'pengurus') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomePengurus()),
-          );
+          Navigator.pushReplacementNamed(context, '/pengurus');
         } else {
           // Jika role tidak dikenali, tampilkan error
           setState(() {

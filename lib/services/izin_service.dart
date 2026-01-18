@@ -99,7 +99,7 @@ class IzinService {
       await _firestore.collection(_collection).doc(id).update({
         'sudahKembali': true,
         'tanggalVerifikasiKembali': Timestamp.fromDate(DateTime.now()),
-        'statusSantri': 'Di Ma\'had',
+        'statusSantri': "Di Ma'had",
       });
       print('✅ Verifikasi kembali berhasil untuk ID: $id');
     } catch (e) {
@@ -119,7 +119,7 @@ class IzinService {
         .map((snapshot) {
           return snapshot.docs
               .map((doc) => IzinPulang.fromFirestore(doc))
-              .where((izin) => izin.status == 'Disetujui' && !izin.sudahKembali)
+              .where((izin) => (izin.status == 'Disetujui' || izin.status == 'Belum Disetujui') && !izin.sudahKembali)
               .toList();
         });
   }

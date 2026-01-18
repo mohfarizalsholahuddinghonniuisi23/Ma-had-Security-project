@@ -133,7 +133,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
           alamat: _alamatController.text.trim(),
           noTelpWali: _noTelpWaliController.text.trim(),
           alasan: _alasanController.text.trim(),
-          status: 'Belum Disetujui',
+          status: 'Disetujui',
           statusSantri: 'Pulang', // Otomatis set status santri = Pulang
           tanggalPulang: _tanggalPulang!,
           tanggalKembali: _tanggalKembali,
@@ -196,10 +196,12 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
     try {
       final XFile? photo = await _picker.pickImage(
         source: kIsWeb ? ImageSource.gallery : ImageSource.camera,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        imageQuality: 85,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 50,
       );
+      
+      // const photo = null; // DISABLED FOR DEBUG
 
       if (photo != null) {
         final bytes = await photo.readAsBytes();

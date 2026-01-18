@@ -38,7 +38,12 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       // Gunakan AuthWrapper untuk cek status login
-      home: const LoginScreen(),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/keamanan': (context) => const HomeKeamanan(),
+        '/pengurus': (context) => const HomePengurus(),
+      },
     );
   }
 }

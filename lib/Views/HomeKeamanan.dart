@@ -7,7 +7,7 @@ import 'package:perizinan_santri/Views/FormIzinPulang.dart';
 import 'package:perizinan_santri/services/auth_service.dart';
 import 'package:perizinan_santri/services/izin_service.dart';
 import 'package:perizinan_santri/models/izin_pulang.dart';
-import 'package:perizinan_santri/Views/login.dart';
+// import 'package:perizinan_santri/Views/login.dart'; // Removed to prevent circular dependency
 
 class HomeKeamanan extends StatefulWidget {
   const HomeKeamanan({super.key});
@@ -60,8 +60,8 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
     if (confirm == true) {
       await _authService.logout();
       if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login',
           (route) => false,
         );
       }
@@ -194,7 +194,9 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isTerlambat ? const BorderSide(color: Colors.red, width: 2) : BorderSide.none,
+        side: isTerlambat 
+            ? const BorderSide(color: Colors.red, width: 2) 
+            : (izin.status == 'Belum Disetujui' ? const BorderSide(color: Colors.orange, width: 2) : BorderSide.none),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -247,6 +249,22 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                         Icon(Icons.warning, color: Colors.white, size: 14),
                         SizedBox(width: 4),
                         Text('TERLAMBAT', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  )
+                else if (izin.status == 'Belum Disetujui')
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.access_time, color: Colors.white, size: 14),
+                        SizedBox(width: 4),
+                        Text('MENUNGGU', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'package:perizinan_santri/Views/login.dart';
+// import 'package:perizinan_santri/Views/login.dart'; // Removed to prevent circular dependency
 import 'package:perizinan_santri/services/auth_service.dart';
 import 'package:perizinan_santri/services/izin_service.dart';
 import 'package:perizinan_santri/models/izin_pulang.dart';
@@ -19,7 +19,6 @@ class _HomePengurusState extends State<HomePengurus> {
   final AuthService _authService = AuthService();
   final IzinService _izinService = IzinService();
 
-  
   // Fungsi untuk logout
   Future<void> _logout() async {
     final confirm = await showDialog<bool>(
@@ -48,18 +47,50 @@ class _HomePengurusState extends State<HomePengurus> {
       await _authService.logout();
       
       if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login',
           (route) => false,
         );
       }
     }
   }
 
-  // Dialog detail izin (read-only)
+  // Fungsi update status izin
+  Future<void> _updateStatus(String id, String status) async {
+    try {
+      await _izinService.updateStatusIzin(id, status);
+      if (mounted) {
+        Navigator.pop(context); // Tutup dialog jika terbuka
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Status berhasil diubah menjadi: $status'),
+            backgroundColor: status == 'Disetujui' ? Colors.green : Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); 
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Gagal update status: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Dialog detail izin dengan approval
   void _showDetailDialog(IzinPulang izin) {
+    // Siapkan action buttons
+    List<Widget> dialogActions = [];
+    
+    dialogActions.add(TextButton(
+      onPressed: () => Navigator.pop(context),
+      child: const Text('Tutup', style: TextStyle(color: Colors.grey)),
+    ));
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -90,21 +121,12 @@ class _HomePengurusState extends State<HomePengurus> {
                   DateFormat('dd MMMM yyyy', 'id_ID')
                       .format(izin.tanggalKembali!),
                 ),
-              
+              _buildDetailRow('Status Approval', izin.status),
               _buildDetailRow('Status Santri', izin.statusSantri),
             ],
           ),
         ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Tutup'),
-          ),
-        ],
+        actions: dialogActions,
       ),
     );
   }
@@ -147,7 +169,6 @@ class _HomePengurusState extends State<HomePengurus> {
     );
   }
 
-
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -177,6 +198,7 @@ class _HomePengurusState extends State<HomePengurus> {
 
   // Widget card untuk setiap izin
   Widget _buildIzinCard(IzinPulang izin) {
+    // Status color based on location (StatusSantri)
     final statusColor = izin.statusSantri == 'Pulang' ? Colors.blue : Colors.green;
 
     return Card(
@@ -203,7 +225,7 @@ class _HomePengurusState extends State<HomePengurus> {
                         : null,
                     child: izin.fotoBase64 == null 
                         ? Text(
-                            izin.namaSantri[0].toUpperCase(),
+                            izin.namaSantri.isNotEmpty ? izin.namaSantri[0].toUpperCase() : '?',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -224,6 +246,7 @@ class _HomePengurusState extends State<HomePengurus> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        const SizedBox(height: 4),
                         Row(
                           children: [
                             Text(
@@ -259,6 +282,30 @@ class _HomePengurusState extends State<HomePengurus> {
                           ],
                         ),
                       ],
+                    ),
+                  ),
+                  // Showing status badge for Approval
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: izin.status == 'Disetujui' 
+                          ? Colors.green.withOpacity(0.1) 
+                          : Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: izin.status == 'Disetujui' ? Colors.green : Colors.orange,
+                      ),
+                    ),
+                    child: Text(
+                      izin.status,
+                      style: TextStyle(
+                        color: izin.status == 'Disetujui' ? Colors.green : Colors.orange,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -418,16 +465,7 @@ class _HomePengurusState extends State<HomePengurus> {
                 Navigator.pop(context);
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.people, color: Colors.blue),
-              title: const Text('Data Santri'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Coming Soon')),
-                );
-              },
-            ),
+
             const Divider(),
             ListTile(
               leading: const Icon(Icons.exit_to_app, color: Colors.red),

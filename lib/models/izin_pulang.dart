@@ -65,6 +65,7 @@ class IzinPulang {
       alamat: data['alamat'] ?? '',
       noTelpWali: data['noTelpWali'] ?? '',
       alasan: data['alasan'] ?? '',
+      status: data['status'] ?? 'Belum Disetujui',
       statusSantri: data['statusSantri'] ?? 'Pulang',
       tanggalPulang: (data['tanggalPulang'] as Timestamp).toDate(),
       tanggalKembali: data['tanggalKembali'] != null
@@ -89,6 +90,7 @@ class IzinPulang {
       'alamat': alamat,
       'noTelpWali': noTelpWali,
       'alasan': alasan,
+      'status': status,
       'statusSantri': statusSantri,
       'tanggalPulang': Timestamp.fromDate(tanggalPulang),
       'tanggalKembali':
