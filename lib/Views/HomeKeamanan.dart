@@ -7,7 +7,6 @@ import 'package:perizinan_santri/Views/FormIzinPulang.dart';
 import 'package:perizinan_santri/services/auth_service.dart';
 import 'package:perizinan_santri/services/izin_service.dart';
 import 'package:perizinan_santri/models/izin_pulang.dart';
-// import 'package:perizinan_santri/Views/login.dart'; // Removed to prevent circular dependency
 
 class HomeKeamanan extends StatefulWidget {
   const HomeKeamanan({super.key});

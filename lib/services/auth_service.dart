@@ -1,38 +1,27 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-/// AuthService adalah "Koki" yang mengurus semua hal tentang Login/Logout
-/// Seperti satpam di pintu masuk gedung yang cek siapa yang boleh masuk
 class AuthService {
   // Koneksi ke Firebase Authentication
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // ═══════════════════════════════════════════════════════════
-  // 📡 STREAM: Pantau status login secara REALTIME
+  //  STREAM: Pantau status login secara REALTIME
   // ═══════════════════════════════════════════════════════════
-  // Seperti CCTV yang selalu memantau siapa yang sedang login
-  // Kalau ada perubahan (login/logout), langsung ketahuan!
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   // ═══════════════════════════════════════════════════════════
-  // 👤 GET CURRENT USER: Siapa yang sedang login?
+  // GET CURRENT USER: Siapa yang sedang login?
   // ═══════════════════════════════════════════════════════════
   User? get currentUser => _auth.currentUser;
 
   // ═══════════════════════════════════════════════════════════
-  // 🔐 LOGIN: Masuk dengan Email & Password
+  // LOGIN: Masuk dengan Email & Password
   // ═══════════════════════════════════════════════════════════
   Future<UserCredential> login({
     required String email,
     required String password,
   }) async {
-    print('');
-    print('═══════════════════════════════════════════════════════════');
-    print('🔐 AUTH SERVICE: Proses Login');
-    print('═══════════════════════════════════════════════════════════');
-    print('📧 Email: $email');
-    print('🔑 Password: ${'*' * password.length}');
-    print('');
-    print('⏳ Menghubungi Firebase Auth...');
+
 
     try {
       // Minta Firebase untuk cek email & password
@@ -41,15 +30,11 @@ class AuthService {
         password: password,
       );
 
-      print('✅ Login berhasil!');
-      print('👤 User ID: ${credential.user?.uid}');
-      print('📧 Email: ${credential.user?.email}');
-      print('═══════════════════════════════════════════════════════════');
+
 
       return credential;
     } on FirebaseAuthException catch (e) {
-      print('❌ Login gagal (FirebaseAuthException): ${e.code} - ${e.message}');
-      print('═══════════════════════════════════════════════════════════');
+
 
       // Terjemahkan pesan error ke Bahasa Indonesia
       String pesanError;
@@ -75,9 +60,7 @@ class AuthService {
       throw Exception(pesanError);
     } catch (e) {
       // Tangkap error lainnya (untuk Flutter Web)
-      print('❌ Login gagal (General Error): $e');
-      print('🔍 Error type: ${e.runtimeType}');
-      print('═══════════════════════════════════════════════════════════');
+
 
       String errorString = e.toString().toLowerCase();
 
@@ -99,19 +82,13 @@ class AuthService {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // 📝 REGISTER: Daftar Akun Baru
+  // REGISTER: Daftar Akun Baru
   // ═══════════════════════════════════════════════════════════
   Future<UserCredential> register({
     required String email,
     required String password,
   }) async {
-    print('');
-    print('═══════════════════════════════════════════════════════════');
-    print('📝 AUTH SERVICE: Proses Register');
-    print('═══════════════════════════════════════════════════════════');
-    print('📧 Email: $email');
-    print('');
-    print('⏳ Mendaftarkan akun baru...');
+
 
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
@@ -119,13 +96,11 @@ class AuthService {
         password: password,
       );
 
-      print('✅ Register berhasil!');
-      print('👤 User ID: ${credential.user?.uid}');
-      print('═══════════════════════════════════════════════════════════');
+
 
       return credential;
     } on FirebaseAuthException catch (e) {
-      print('❌ Register gagal: ${e.message}');
+
 
       String pesanError;
       switch (e.code) {
@@ -146,19 +121,13 @@ class AuthService {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // 🚪 LOGOUT: Keluar dari Aplikasi
+  // LOGOUT: Keluar dari Aplikasi
   // ═══════════════════════════════════════════════════════════
   Future<void> logout() async {
-    print('');
-    print('═══════════════════════════════════════════════════════════');
-    print('🚪 AUTH SERVICE: Proses Logout');
-    print('═══════════════════════════════════════════════════════════');
-    print('👤 User: ${_auth.currentUser?.email}');
-    print('⏳ Melakukan logout...');
+
 
     await _auth.signOut();
 
-    print('✅ Logout berhasil!');
-    print('═══════════════════════════════════════════════════════════');
+
   }
 }

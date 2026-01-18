@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:perizinan_santri/Views/HomeKeamanan.dart'; // Removed for named routes
-// import 'package:perizinan_santri/Views/HomePengurus.dart'; // Removed for named routes
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:perizinan_santri/services/auth_service.dart';
 
@@ -14,7 +12,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   // ═══════════════════════════════════════════════════════════
-  // 📦 VARIABEL-VARIABEL YANG DIBUTUHKAN
+  //  VARIABEL-VARIABEL YANG DIBUTUHKAN
   // ═══════════════════════════════════════════════════════════
 
   // Form key untuk validasi
@@ -33,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _errorMessage; // Pesan error jika ada
 
   // ═══════════════════════════════════════════════════════════
-  // 🗑️ DISPOSE: Bersihkan memory saat widget dihapus
+  //  DISPOSE: Bersihkan memory saat widget dihapus
   // ═══════════════════════════════════════════════════════════
   @override
   void dispose() {
@@ -43,28 +41,28 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // 🔐 FUNGSI LOGIN
+  //  FUNGSI LOGIN
   // ═══════════════════════════════════════════════════════════
   Future<void> _login() async {
-    // 1️⃣ Validasi form dulu
+    // 1️ Validasi form dulu
     if (!_formKey.currentState!.validate()) {
       return; // Stop jika form tidak valid
     }
 
-    // 2️⃣ Set loading = true (tampilkan loading)
+    // 2️ Set loading = true (tampilkan loading)
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      // 3️⃣ Panggil AuthService untuk login
+      // 3️ Panggil AuthService untuk login
       final credential = await _authService.login(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
-      // 4️⃣ Ambil role user dari Firestore
+      // 4️ Ambil role user dari Firestore
       String? role;
       final userEmail = credential.user?.email ?? '';
       
@@ -76,10 +74,8 @@ class _LoginScreenState extends State<LoginScreen> {
         
         if (snapshot.exists && snapshot.data()?['role'] != null) {
           role = snapshot.data()?['role'] as String?;
-          print('✅ Role dari Firestore: $role');
         } else {
           // Role tidak ada di Firestore, tentukan dari email
-          print('ℹ️ Role tidak ditemukan di Firestore, mendeteksi dari email...');
           
           if (userEmail.contains('keamanan')) {
             role = 'keamanan';
@@ -98,11 +94,9 @@ class _LoginScreenState extends State<LoginScreen> {
               'role': role,
               'createdAt': FieldValue.serverTimestamp(),
             }, SetOptions(merge: true));
-            print('✅ Role "$role" disimpan ke Firestore');
           }
         }
       } catch (e) {
-        print('⚠️ Error fetching role: $e');
         // Fallback: tentukan dari email
         if (userEmail.contains('keamanan')) {
           role = 'keamanan';
@@ -111,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
 
-      // 5️⃣ Arahkan ke dashboard sesuai role
+      // 5️ Arahkan ke dashboard sesuai role
       if (mounted) {
         if (role == 'keamanan') {
           Navigator.pushReplacementNamed(context, '/keamanan');
@@ -125,12 +119,12 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } catch (e) {
-      // 6️⃣ Jika gagal, tampilkan error
+      // 6️ Jika gagal, tampilkan error
       setState(() {
         _errorMessage = e.toString().replaceAll('Exception: ', '');
       });
     } finally {
-      // 7️⃣ Matikan loading
+      // 7️ Matikan loading
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -140,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // 🎨 BUILD UI
+  //  BUILD UI
   // ═══════════════════════════════════════════════════════════
   @override
   Widget build(BuildContext context) {
@@ -156,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // ══════════════════════════════════════════
-                  // 🔒 ICON & JUDUL
+                  //  ICON & JUDUL
                   // ══════════════════════════════════════════
                   Container(
                     padding: const EdgeInsets.all(20),
@@ -192,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 40),
 
                   // ══════════════════════════════════════════
-                  // 📋 CARD FORM LOGIN
+                  //  CARD FORM LOGIN
                   // ══════════════════════════════════════════
                   Card(
                     elevation: 4,
@@ -213,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 24),
 
                           // ══════════════════════════════════
-                          // 📧 INPUT EMAIL
+                          //  INPUT EMAIL
                           // ══════════════════════════════════
                           TextFormField(
                             controller: _emailController,
@@ -239,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 16),
 
                           // ══════════════════════════════════
-                          // 🔑 INPUT PASSWORD
+                          //  INPUT PASSWORD
                           // ══════════════════════════════════
                           TextFormField(
                             controller: _passwordController,
@@ -277,7 +271,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 24),
 
                           // ══════════════════════════════════
-                          // ❌ PESAN ERROR (jika ada)
+                          //  PESAN ERROR (jika ada)
                           // ══════════════════════════════════
                           if (_errorMessage != null)
                             Container(
@@ -304,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
 
                           // ══════════════════════════════════
-                          // 🔘 TOMBOL LOGIN
+                          //  TOMBOL LOGIN
                           // ══════════════════════════════════
                           SizedBox(
                             width: double.infinity,
@@ -341,7 +335,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 24),
 
                   // ══════════════════════════════════════════
-                  // ℹ️ INFO BANTUAN
+                  //  INFO BANTUAN
                   // ══════════════════════════════════════════
                   const Text(
                     'Hubungi admin No. Telp: 081227825205 untuk bantuan login.',

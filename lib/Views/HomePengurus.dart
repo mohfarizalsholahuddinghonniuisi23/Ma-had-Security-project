@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-// import 'package:perizinan_santri/Views/login.dart'; // Removed to prevent circular dependency
 import 'package:perizinan_santri/services/auth_service.dart';
 import 'package:perizinan_santri/services/izin_service.dart';
 import 'package:perizinan_santri/models/izin_pulang.dart';

@@ -123,7 +123,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
         // Konversi foto ke base64 jika ada
         if (_selectedImage != null && _selectedImageBytes != null) {
           fotoBase64 = base64Encode(_selectedImageBytes!);
-          print('✅ Foto dikonversi ke base64 (${(fotoBase64.length / 1024).toStringAsFixed(1)} KB)');
+
         }
         
         // Buat object IzinPulang dari form
@@ -359,7 +359,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
               ),
               const SizedBox(height: 16),
 
-              // 📅 Date Picker untuk Tanggal Pulang
+              // Date Picker untuk Tanggal Pulang
               InkWell(
                 onTap: _pilihTanggal,
                 child: InputDecorator(
@@ -389,7 +389,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
               ),
               const SizedBox(height: 16),
 
-              // 📅 Date Picker untuk Tanggal Kembali
+              // Date Picker untuk Tanggal Kembali
               InkWell(
                 onTap: _pilihTanggalKembali,
                 child: InputDecorator(

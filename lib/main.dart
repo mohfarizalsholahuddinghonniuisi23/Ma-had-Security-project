@@ -17,9 +17,9 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print('Firebase initialized successfully!');
+    // Firebase initialized
   } catch (e) {
-    print('Firebase initialization error: $e');
+    // Silent error or log if critical
   }
 
   runApp(const MyApp());
@@ -49,7 +49,6 @@ class MyApp extends StatelessWidget {
 }
 
 /// AuthWrapper: Widget yang memutuskan tampilkan Login atau Home
-/// Seperti satpam di pintu yang cek: "Sudah punya kartu akses belum?"
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
@@ -59,14 +58,8 @@ class AuthWrapper extends StatelessWidget {
       // Stream dari Firebase Auth yang memantau status login
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        print('');
-        print('═══════════════════════════════════════════════════════════');
-        print('🔍 AUTH WRAPPER: Mengecek status login...');
-        print('═══════════════════════════════════════════════════════════');
-
-        // 1️⃣ Sedang loading (mengecek status)
+        // 1️ Sedang loading (mengecek status)
         if (snapshot.connectionState == ConnectionState.waiting) {
-          print('⏳ Status: Sedang mengecek...');
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
@@ -74,20 +67,12 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
-        // 2️⃣ Cek apakah ada user yang login
+        // 2️ Cek apakah ada user yang login
         if (snapshot.hasData && snapshot.data != null) {
           // Ada user yang login!
-          print('✅ Status: USER SUDAH LOGIN');
-          print('👤 Email: ${snapshot.data!.email}');
-          print('🆔 UID: ${snapshot.data!.uid}');
-          print('➡️ Menampilkan: HomeKeamanan');
-          print('═══════════════════════════════════════════════════════════');
           return const HomeKeamanan();
         } else {
           // Tidak ada user yang login
-          print('❌ Status: BELUM LOGIN');
-          print('➡️ Menampilkan: LoginScreen');
-          print('═══════════════════════════════════════════════════════════');
           return const LoginScreen();
         }
       },

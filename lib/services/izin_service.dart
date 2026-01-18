@@ -92,7 +92,7 @@ class IzinService {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // 🆕 VERIFIKASI KEMBALI - Konfirmasi santri sudah kembali
+  // VERIFIKASI KEMBALI - Konfirmasi santri sudah kembali
   // ═══════════════════════════════════════════════════════════
   Future<void> verifikasiKembali(String id) async {
     try {
@@ -101,14 +101,14 @@ class IzinService {
         'tanggalVerifikasiKembali': Timestamp.fromDate(DateTime.now()),
         'statusSantri': "Di Ma'had",
       });
-      print('✅ Verifikasi kembali berhasil untuk ID: $id');
+
     } catch (e) {
       throw Exception('Gagal verifikasi kembali: $e');
     }
   }
 
   // ═══════════════════════════════════════════════════════════
-  // 🆕 GET IZIN AKTIF - Izin yang disetujui & belum kembali
+  // GET IZIN AKTIF - Izin yang disetujui & belum kembali
   // ═══════════════════════════════════════════════════════════
   Stream<List<IzinPulang>> getIzinAktif() {
     // Simple query tanpa composite index - filter di app
@@ -125,7 +125,7 @@ class IzinService {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // 🆕 GET RIWAYAT IZIN - Izin yang sudah selesai (sudah kembali)
+  // GET RIWAYAT IZIN - Izin yang sudah selesai (sudah kembali)
   // ═══════════════════════════════════════════════════════════
   Stream<List<IzinPulang>> getRiwayatIzin() {
     // Simple query tanpa composite index - filter di app
