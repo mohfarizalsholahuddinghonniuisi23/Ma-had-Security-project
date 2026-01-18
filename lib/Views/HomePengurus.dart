@@ -88,7 +88,8 @@ class _HomePengurusState extends State<HomePengurus> {
                   DateFormat('dd MMMM yyyy', 'id_ID')
                       .format(izin.tanggalKembali!),
                 ),
-              _buildDetailRow('Status', izin.status),
+              
+              _buildDetailRow('Status Santri', izin.statusSantri),
             ],
           ),
         ),
@@ -135,9 +136,6 @@ class _HomePengurusState extends State<HomePengurus> {
 
   // Widget card untuk setiap izin
   Widget _buildIzinCard(IzinPulang izin) {
-    final isApproved = izin.status == 'Disetujui';
-    final statusColor = isApproved ? Colors.green : Colors.orange;
-
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -156,13 +154,13 @@ class _HomePengurusState extends State<HomePengurus> {
                 children: [
                   CircleAvatar(
                     radius: 25,
-                    backgroundColor: statusColor.withOpacity(0.2),
+                    backgroundColor: Colors.blue.withOpacity(0.2),
                     child: Text(
                       izin.namaSantri[0].toUpperCase(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: statusColor,
+                        color: Colors.blue,
                       ),
                     ),
                   ),
@@ -178,33 +176,41 @@ class _HomePengurusState extends State<HomePengurus> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          'NIS: ${izin.nis}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              'NIS: ${izin.nis}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: izin.statusSantri == 'Pulang'
+                                    ? Colors.blue.withOpacity(0.2)
+                                    : Colors.green.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '📍 ${izin.statusSantri}',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: izin.statusSantri == 'Pulang'
+                                      ? Colors.blue[700]
+                                      : Colors.green[700],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: statusColor),
-                    ),
-                    child: Text(
-                      izin.status,
-                      style: TextStyle(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
                     ),
                   ),
                 ],

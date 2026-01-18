@@ -8,6 +8,7 @@ class IzinPulang {
   final String noTelpWali;
   final String alasan;
   final String status; // "Belum Disetujui" / "Disetujui"
+  final String statusSantri; // "Pulang" / "Di Ma'had" - Status lokasi santri
   final DateTime tanggalPulang;
   final DateTime? tanggalKembali;
   final DateTime createdAt;
@@ -20,6 +21,7 @@ class IzinPulang {
     required this.noTelpWali,
     required this.alasan,
     this.status = 'Belum Disetujui',
+    this.statusSantri = 'Pulang',
     required this.tanggalPulang,
     this.tanggalKembali,
     DateTime? createdAt,
@@ -35,7 +37,7 @@ class IzinPulang {
       alamat: data['alamat'] ?? '',
       noTelpWali: data['noTelpWali'] ?? '',
       alasan: data['alasan'] ?? '',
-      status: data['status'] ?? 'Belum Disetujui',
+      statusSantri: data['statusSantri'] ?? 'Pulang',
       tanggalPulang: (data['tanggalPulang'] as Timestamp).toDate(),
       tanggalKembali: data['tanggalKembali'] != null
           ? (data['tanggalKembali'] as Timestamp).toDate()
@@ -52,7 +54,7 @@ class IzinPulang {
       'alamat': alamat,
       'noTelpWali': noTelpWali,
       'alasan': alasan,
-      'status': status,
+      'statusSantri': statusSantri,
       'tanggalPulang': Timestamp.fromDate(tanggalPulang),
       'tanggalKembali':
           tanggalKembali != null ? Timestamp.fromDate(tanggalKembali!) : null,
@@ -68,7 +70,7 @@ class IzinPulang {
     String? alamat,
     String? noTelpWali,
     String? alasan,
-    String? status,
+    String? statusSantri,
     DateTime? tanggalPulang,
     DateTime? tanggalKembali,
     DateTime? createdAt,
@@ -80,7 +82,7 @@ class IzinPulang {
       alamat: alamat ?? this.alamat,
       noTelpWali: noTelpWali ?? this.noTelpWali,
       alasan: alasan ?? this.alasan,
-      status: status ?? this.status,
+      statusSantri: statusSantri ?? this.statusSantri,
       tanggalPulang: tanggalPulang ?? this.tanggalPulang,
       tanggalKembali: tanggalKembali ?? this.tanggalKembali,
       createdAt: createdAt ?? this.createdAt,
@@ -89,6 +91,6 @@ class IzinPulang {
 
   @override
   String toString() {
-    return 'IzinPulang(id: $id, namaSantri: $namaSantri, nis: $nis, status: $status)';
+    return 'IzinPulang(id: $id, namaSantri: $namaSantri, nis: $nis,  statusSantri: $statusSantri)';
   }
 }
