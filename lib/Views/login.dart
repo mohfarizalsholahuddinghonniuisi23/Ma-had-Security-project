@@ -349,7 +349,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // ℹ️ INFO BANTUAN
                   // ══════════════════════════════════════════
                   const Text(
-                    'Hubungi admin jika lupa password',
+                    'Hubungi admin No. Telp: 081227825205 untuk bantuan login.',
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 14,
