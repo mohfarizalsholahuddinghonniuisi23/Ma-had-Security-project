@@ -74,8 +74,10 @@ class _LoginScreenState extends State<LoginScreen> {
         
         if (snapshot.exists && snapshot.data()?['role'] != null) {
           role = snapshot.data()?['role'] as String?;
+          print('✅ Role dari Firestore: $role');
         } else {
           // Role tidak ada di Firestore, tentukan dari email
+          print('Role tidak ditemukan di Firestore, mendeteksi dari email...');
           
           if (userEmail.contains('keamanan')) {
             role = 'keamanan';
@@ -94,9 +96,11 @@ class _LoginScreenState extends State<LoginScreen> {
               'role': role,
               'createdAt': FieldValue.serverTimestamp(),
             }, SetOptions(merge: true));
+            print('✅ Role "$role" disimpan ke Firestore');
           }
         }
       } catch (e) {
+        print('⚠️ Error fetching role: $e');
         // Fallback: tentukan dari email
         if (userEmail.contains('keamanan')) {
           role = 'keamanan';
