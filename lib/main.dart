@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       // Gunakan StreamBuilder untuk cek status login
-       home: const AuthWrapper(),
+       home: const HomePengurus(),
       
     );
   }

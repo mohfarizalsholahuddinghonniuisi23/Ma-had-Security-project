@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/izin_pulang.dart';
-import '../services/izin_service.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:perizinan_santri/models/izin_pulang.dart';
+import 'package:perizinan_santri/services/izin_service.dart';
 
 class FormIzinPulang extends StatefulWidget {
   const FormIzinPulang({super.key});
@@ -23,6 +25,10 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
   
   // State untuk loading
   bool _isLoading = false;
+
+  // Image picker
+  final ImagePicker _picker = ImagePicker();
+  File? _selectedImage;
 
   // Tanggal pulang
   DateTime? _tanggalPulang;
@@ -171,21 +177,56 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
       _selectedStatus = null;
       _tanggalPulang = null;
       _tanggalKembali = null;
+      _selectedImage = null;
     });
   }
 
-  void _uploadFoto() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Coming Soon'),
-        content: const Text('Fitur upload foto akan segera hadir!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+  // Fungsi untuk ambil foto langsung dari kamera
+  Future<void> _ambilFoto() async {
+    try {
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+
+      if (photo != null) {
+        setState(() {
+          _selectedImage = File(photo.path);
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Foto berhasil diambil!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Gagal mengambil foto: $e'),
+            backgroundColor: Colors.red,
           ),
-        ],
+        );
+      }
+    }
+  }
+
+  // Fungsi untuk hapus foto
+  void _hapusFoto() {
+    setState(() {
+      _selectedImage = null;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Foto dihapus'),
+        duration: Duration(seconds: 2),
       ),
     );
   }
@@ -431,45 +472,106 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
               ),
               const SizedBox(height: 20),
 
-              // Upload Foto (Coming Soon)
+              // Ambil Foto
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: Colors.orange.shade300),
                   borderRadius: BorderRadius.circular(10),
+                  color: Colors.orange.shade50,
                 ),
                 child: Column(
                   children: [
-                    const Icon(
-                      Icons.photo_camera,
-                      size: 50,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Bukti Foto',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    if (_selectedImage != null) ...[
+                      // Preview foto yang diambil
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.file(
+                              _selectedImage!,
+                              height: 250,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: IconButton(
+                              onPressed: _hapusFoto,
+                              icon: const Icon(Icons.close),
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    const Text(
-                      'Coming Soon',
-                      style: TextStyle(
+                      const SizedBox(height: 10),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Foto berhasil diambil',
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        onPressed: _ambilFoto,
+                        icon: const Icon(Icons.camera_alt),
+                        label: const Text('Ambil Ulang'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.orange,
+                          side: const BorderSide(color: Colors.orange),
+                        ),
+                      ),
+                    ] else ...[
+                      const Icon(
+                        Icons.camera_alt,
+                        size: 60,
                         color: Colors.orange,
-                        fontStyle: FontStyle.italic,
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    OutlinedButton.icon(
-                      onPressed: _uploadFoto,
-                      icon: const Icon(Icons.upload),
-                      label: const Text('Upload Foto'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.grey,
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Bukti Foto',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 5),
+                      const Text(
+                        'Ambil foto langsung dari kamera',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 15),
+                      ElevatedButton.icon(
+                        onPressed: _ambilFoto,
+                        icon: const Icon(Icons.camera_alt),
+                        label: const Text('Ambil Foto'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
