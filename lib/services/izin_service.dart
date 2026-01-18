@@ -99,6 +99,7 @@ class IzinService {
       await _firestore.collection(_collection).doc(id).update({
         'sudahKembali': true,
         'tanggalVerifikasiKembali': Timestamp.fromDate(DateTime.now()),
+        'statusSantri': 'Di Ma\'had',
       });
       print('✅ Verifikasi kembali berhasil untuk ID: $id');
     } catch (e) {
