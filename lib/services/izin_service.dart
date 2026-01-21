@@ -94,14 +94,14 @@ class IzinService {
   // ═══════════════════════════════════════════════════════════
   // VERIFIKASI KEMBALI - Konfirmasi santri sudah kembali
   // ═══════════════════════════════════════════════════════════
-  Future<void> verifikasiKembali(String id) async {
+  Future<void> verifikasiKembali(String id, {String? namaKeamanan}) async {
     try {
       await _firestore.collection(_collection).doc(id).update({
         'sudahKembali': true,
         'tanggalVerifikasiKembali': Timestamp.fromDate(DateTime.now()),
         'statusSantri': "Di Ma'had",
+        'namaKeamananVerifikasi': namaKeamanan,
       });
-
     } catch (e) {
       throw Exception('Gagal verifikasi kembali: $e');
     }
@@ -117,11 +117,14 @@ class IzinService {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => IzinPulang.fromFirestore(doc))
-              .where((izin) => (izin.status == 'Disetujui' || izin.status == 'Belum Disetujui') && !izin.sudahKembali)
-              .toList();
-        });
+      return snapshot.docs
+          .map((doc) => IzinPulang.fromFirestore(doc))
+          .where((izin) =>
+              (izin.status == 'Disetujui' ||
+                  izin.status == 'Belum Disetujui') &&
+              !izin.sudahKembali)
+          .toList();
+    });
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -134,11 +137,11 @@ class IzinService {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => IzinPulang.fromFirestore(doc))
-              .where((izin) => izin.sudahKembali)
-              .toList();
-        });
+      return snapshot.docs
+          .map((doc) => IzinPulang.fromFirestore(doc))
+          .where((izin) => izin.sudahKembali)
+          .toList();
+    });
   }
 
   // DELETE - Hapus izin
@@ -169,10 +172,10 @@ class IzinService {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => IzinPulang.fromFirestore(doc))
-              .where((izin) => izin.status == 'Disetujui' && !izin.sudahKembali)
-              .toList();
-        });
+      return snapshot.docs
+          .map((doc) => IzinPulang.fromFirestore(doc))
+          .where((izin) => izin.status == 'Disetujui' && !izin.sudahKembali)
+          .toList();
+    });
   }
 }

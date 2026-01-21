@@ -15,7 +15,8 @@ class HomeKeamanan extends StatefulWidget {
   State<HomeKeamanan> createState() => _HomeKeamananState();
 }
 
-class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderStateMixin {
+class _HomeKeamananState extends State<HomeKeamanan>
+    with SingleTickerProviderStateMixin {
   final AuthService _authService = AuthService();
   final IzinService _izinService = IzinService();
   late TabController _tabController;
@@ -24,6 +25,24 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadUserProfile();
+  }
+
+  // State untuk nama profil
+  String _namaKeamanan = 'Petugas Keamanan';
+
+  // Load profil user dari Firestore
+  Future<void> _loadUserProfile() async {
+    try {
+      final profile = await _authService.getUserProfile();
+      if (profile != null && profile['name'] != null && mounted) {
+        setState(() {
+          _namaKeamanan = profile['name'];
+        });
+      }
+    } catch (e) {
+      // Ignore error, use default name
+    }
   }
 
   @override
@@ -67,6 +86,76 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
     }
   }
 
+  // Dialog edit profil
+  void _showEditProfileDialog() {
+    final TextEditingController nameController =
+        TextEditingController(text: _namaKeamanan);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.person, color: Colors.teal),
+            SizedBox(width: 8),
+            Text('Edit Profil'),
+          ],
+        ),
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(
+            labelText: 'Nama Lengkap',
+            hintText: 'Masukkan nama Anda',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.badge),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newName = nameController.text.trim();
+              if (newName.isNotEmpty) {
+                try {
+                  await _authService.updateUserProfile(newName);
+                  setState(() {
+                    _namaKeamanan = newName;
+                  });
+                  if (mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('✅ Profil berhasil diperbarui'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('❌ Gagal update: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Fungsi verifikasi kembali
   Future<void> _verifikasiKembali(IzinPulang izin) async {
     final confirm = await showDialog<bool>(
@@ -88,17 +177,20 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Nama: ${izin.namaSantri}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Nama: ${izin.namaSantri}',
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                   Text('NIS: ${izin.nis}'),
                   if (izin.isTerlambat())
                     Container(
                       margin: const EdgeInsets.only(top: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text('TERLAMBAT', style: TextStyle(color: Colors.white, fontSize: 12)),
+                      child: const Text('TERLAMBAT',
+                          style: TextStyle(color: Colors.white, fontSize: 12)),
                     ),
                 ],
               ),
@@ -124,7 +216,11 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
 
     if (confirm == true) {
       try {
-        await _izinService.verifikasiKembali(izin.id!);
+        // Get current user email for verification record
+        await _izinService.verifikasiKembali(
+          izin.id!,
+          namaKeamanan: _namaKeamanan,
+        );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -170,11 +266,11 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                 child: Image.memory(
                   base64Decode(base64Foto),
                   fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => 
-                    const Center(child: Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Text('Gagal memuat foto'),
-                    )),
+                  errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Text('Gagal memuat foto'),
+                  )),
                 ),
               ),
             ),
@@ -187,15 +283,17 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
   // Widget card untuk izin aktif
   Widget _buildIzinAktifCard(IzinPulang izin) {
     final isTerlambat = izin.isTerlambat();
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isTerlambat 
-            ? const BorderSide(color: Colors.red, width: 2) 
-            : (izin.status == 'Belum Disetujui' ? const BorderSide(color: Colors.orange, width: 2) : BorderSide.none),
+        side: isTerlambat
+            ? const BorderSide(color: Colors.red, width: 2)
+            : (izin.status == 'Belum Disetujui'
+                ? const BorderSide(color: Colors.orange, width: 2)
+                : BorderSide.none),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -207,11 +305,12 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
               children: [
                 CircleAvatar(
                   radius: 25,
-                  backgroundImage: izin.fotoBase64 != null 
-                      ? MemoryImage(base64Decode(izin.fotoBase64!)) 
+                  backgroundImage: izin.fotoBase64 != null
+                      ? MemoryImage(base64Decode(izin.fotoBase64!))
                       : null,
-                  backgroundColor: isTerlambat ? Colors.red.shade100 : Colors.teal.shade100,
-                  child: izin.fotoBase64 == null 
+                  backgroundColor:
+                      isTerlambat ? Colors.red.shade100 : Colors.teal.shade100,
+                  child: izin.fotoBase64 == null
                       ? Text(
                           izin.namaSantri[0].toUpperCase(),
                           style: TextStyle(
@@ -229,15 +328,19 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                     children: [
                       Text(
                         izin.namaSantri,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      Text('NIS: ${izin.nis}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                      Text('NIS: ${izin.nis}',
+                          style:
+                              TextStyle(color: Colors.grey[600], fontSize: 12)),
                     ],
                   ),
                 ),
                 if (isTerlambat)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(20),
@@ -247,13 +350,18 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                       children: [
                         Icon(Icons.warning, color: Colors.white, size: 14),
                         SizedBox(width: 4),
-                        Text('TERLAMBAT', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                        Text('TERLAMBAT',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold)),
                       ],
                     ),
                   )
                 else if (izin.status == 'Belum Disetujui')
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: Colors.orange,
                       borderRadius: BorderRadius.circular(20),
@@ -263,7 +371,11 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                       children: [
                         Icon(Icons.access_time, color: Colors.white, size: 14),
                         SizedBox(width: 4),
-                        Text('MENUNGGU', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                        Text('MENUNGGU',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -281,11 +393,15 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                 ),
                 if (izin.tanggalKembali != null) ...[
                   const SizedBox(width: 16),
-                  Icon(Icons.event_available, size: 16, color: isTerlambat ? Colors.red : Colors.grey[600]),
+                  Icon(Icons.event_available,
+                      size: 16,
+                      color: isTerlambat ? Colors.red : Colors.grey[600]),
                   const SizedBox(width: 8),
                   Text(
                     'Kembali: ${DateFormat('dd MMM yyyy').format(izin.tanggalKembali!)}',
-                    style: TextStyle(fontSize: 13, color: isTerlambat ? Colors.red : Colors.grey[700]),
+                    style: TextStyle(
+                        fontSize: 13,
+                        color: isTerlambat ? Colors.red : Colors.grey[700]),
                   ),
                 ],
               ],
@@ -317,7 +433,7 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                     Text(
                       'Lihat Foto Bukti',
                       style: TextStyle(
-                        fontSize: 13, 
+                        fontSize: 13,
                         color: Colors.blue[700],
                         decoration: TextDecoration.underline,
                       ),
@@ -350,7 +466,7 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
   // Widget card untuk riwayat
   Widget _buildRiwayatCard(IzinPulang izin) {
     final isTerlambat = izin.isTerlambat();
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 1,
@@ -365,10 +481,10 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.green.shade100,
-                  backgroundImage: izin.fotoBase64 != null 
-                      ? MemoryImage(base64Decode(izin.fotoBase64!)) 
+                  backgroundImage: izin.fotoBase64 != null
+                      ? MemoryImage(base64Decode(izin.fotoBase64!))
                       : null,
-                  child: izin.fotoBase64 == null 
+                  child: izin.fotoBase64 == null
                       ? const Icon(Icons.check, color: Colors.green)
                       : null,
                 ),
@@ -377,19 +493,25 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(izin.namaSantri, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      Text('NIS: ${izin.nis}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                      Text(izin.namaSantri,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text('NIS: ${izin.nis}',
+                          style:
+                              TextStyle(color: Colors.grey[600], fontSize: 12)),
                     ],
                   ),
                 ),
                 if (isTerlambat)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.orange.shade100,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text('Terlambat', style: TextStyle(color: Colors.orange[800], fontSize: 11)),
+                    child: Text('Terlambat',
+                        style:
+                            TextStyle(color: Colors.orange[800], fontSize: 11)),
                   ),
               ],
             ),
@@ -419,7 +541,7 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                     Text(
                       'Lihat Foto Bukti',
                       style: TextStyle(
-                        fontSize: 12, 
+                        fontSize: 12,
                         color: Colors.blue[700],
                         decoration: TextDecoration.underline,
                       ),
@@ -479,12 +601,16 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    user?.email ?? 'Petugas Keamanan',
-                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                    _namaKeamanan,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Ma\'had Security',
-                    style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+                    user?.email ?? 'Ma\'had Security',
+                    style: TextStyle(
+                        color: Colors.white.withOpacity(0.9), fontSize: 12),
                   ),
                 ],
               ),
@@ -494,7 +620,20 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
               title: const Text('Buat Izin Pulang'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const FormIzinPulang()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const FormIzinPulang()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person, color: Colors.teal),
+              title: const Text('Edit Profil'),
+              subtitle:
+                  Text(_namaKeamanan, style: const TextStyle(fontSize: 12)),
+              onTap: () {
+                Navigator.pop(context);
+                _showEditProfileDialog();
               },
             ),
             const Divider(),
@@ -520,26 +659,32 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
+                return Center(
+                    child: Text('Error: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red)));
               }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.check_circle_outline, size: 80, color: Colors.grey[400]),
+                      Icon(Icons.check_circle_outline,
+                          size: 80, color: Colors.grey[400]),
                       const SizedBox(height: 16),
-                      Text('Tidak ada santri yang sedang izin', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+                      Text('Tidak ada santri yang sedang izin',
+                          style:
+                              TextStyle(fontSize: 16, color: Colors.grey[600])),
                     ],
                   ),
                 );
               }
-              
+
               final izinList = snapshot.data!;
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: izinList.length,
-                itemBuilder: (context, index) => _buildIzinAktifCard(izinList[index]),
+                itemBuilder: (context, index) =>
+                    _buildIzinAktifCard(izinList[index]),
               );
             },
           ),
@@ -551,7 +696,9 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
+                return Center(
+                    child: Text('Error: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red)));
               }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return Center(
@@ -560,24 +707,28 @@ class _HomeKeamananState extends State<HomeKeamanan> with SingleTickerProviderSt
                     children: [
                       Icon(Icons.history, size: 80, color: Colors.grey[400]),
                       const SizedBox(height: 16),
-                      Text('Belum ada riwayat izin', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+                      Text('Belum ada riwayat izin',
+                          style:
+                              TextStyle(fontSize: 16, color: Colors.grey[600])),
                     ],
                   ),
                 );
               }
-              
+
               final izinList = snapshot.data!;
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: izinList.length,
-                itemBuilder: (context, index) => _buildRiwayatCard(izinList[index]),
+                itemBuilder: (context, index) =>
+                    _buildRiwayatCard(izinList[index]),
               );
             },
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FormIzinPulang())),
+        onPressed: () => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const FormIzinPulang())),
         backgroundColor: Colors.teal,
         child: const Icon(Icons.add, color: Colors.white),
         tooltip: 'Buat Izin Pulang',

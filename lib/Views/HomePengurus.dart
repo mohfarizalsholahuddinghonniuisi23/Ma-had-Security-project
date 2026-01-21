@@ -44,7 +44,7 @@ class _HomePengurusState extends State<HomePengurus> {
 
     if (confirm == true) {
       await _authService.logout();
-      
+
       if (mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil(
           '/login',
@@ -69,7 +69,7 @@ class _HomePengurusState extends State<HomePengurus> {
       }
     } catch (e) {
       if (mounted) {
-        Navigator.pop(context); 
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Gagal update status: $e'),
@@ -84,7 +84,7 @@ class _HomePengurusState extends State<HomePengurus> {
   void _showDetailDialog(IzinPulang izin) {
     // Siapkan action buttons
     List<Widget> dialogActions = [];
-    
+
     dialogActions.add(TextButton(
       onPressed: () => Navigator.pop(context),
       child: const Text('Tutup', style: TextStyle(color: Colors.grey)),
@@ -122,6 +122,18 @@ class _HomePengurusState extends State<HomePengurus> {
                 ),
               _buildDetailRow('Status Approval', izin.status),
               _buildDetailRow('Status Santri', izin.statusSantri),
+              if (izin.namaKeamananIzin != null)
+                _buildDetailRow(
+                    'Diizinkan Pulang Oleh', izin.namaKeamananIzin!),
+              if (izin.namaKeamananVerifikasi != null)
+                _buildDetailRow(
+                    'Diverifikasi Kembali Oleh', izin.namaKeamananVerifikasi!),
+              if (izin.tanggalVerifikasiKembali != null)
+                _buildDetailRow(
+                  'Tanggal Verifikasi Kembali',
+                  DateFormat('dd MMMM yyyy HH:mm', 'id_ID')
+                      .format(izin.tanggalVerifikasiKembali!),
+                ),
             ],
           ),
         ),
@@ -154,11 +166,11 @@ class _HomePengurusState extends State<HomePengurus> {
                 child: Image.memory(
                   base64Decode(base64Foto),
                   fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => 
-                    const Center(child: Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Text('Gagal memuat foto'),
-                    )),
+                  errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Text('Gagal memuat foto'),
+                  )),
                 ),
               ),
             ),
@@ -198,7 +210,8 @@ class _HomePengurusState extends State<HomePengurus> {
   // Widget card untuk setiap izin
   Widget _buildIzinCard(IzinPulang izin) {
     // Status color based on location (StatusSantri)
-    final statusColor = izin.statusSantri == 'Pulang' ? Colors.blue : Colors.green;
+    final statusColor =
+        izin.statusSantri == 'Pulang' ? Colors.blue : Colors.green;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -219,12 +232,14 @@ class _HomePengurusState extends State<HomePengurus> {
                   CircleAvatar(
                     radius: 25,
                     backgroundColor: statusColor.withOpacity(0.2),
-                    backgroundImage: izin.fotoBase64 != null 
-                        ? MemoryImage(base64Decode(izin.fotoBase64!)) 
+                    backgroundImage: izin.fotoBase64 != null
+                        ? MemoryImage(base64Decode(izin.fotoBase64!))
                         : null,
-                    child: izin.fotoBase64 == null 
+                    child: izin.fotoBase64 == null
                         ? Text(
-                            izin.namaSantri.isNotEmpty ? izin.namaSantri[0].toUpperCase() : '?',
+                            izin.namaSantri.isNotEmpty
+                                ? izin.namaSantri[0].toUpperCase()
+                                : '?',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -290,18 +305,22 @@ class _HomePengurusState extends State<HomePengurus> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: izin.status == 'Disetujui' 
-                          ? Colors.green.withOpacity(0.1) 
+                      color: izin.status == 'Disetujui'
+                          ? Colors.green.withOpacity(0.1)
                           : Colors.orange.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: izin.status == 'Disetujui' ? Colors.green : Colors.orange,
+                        color: izin.status == 'Disetujui'
+                            ? Colors.green
+                            : Colors.orange,
                       ),
                     ),
                     child: Text(
                       izin.status,
                       style: TextStyle(
-                        color: izin.status == 'Disetujui' ? Colors.green : Colors.orange,
+                        color: izin.status == 'Disetujui'
+                            ? Colors.green
+                            : Colors.orange,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -312,8 +331,7 @@ class _HomePengurusState extends State<HomePengurus> {
               const Divider(height: 24),
               Row(
                 children: [
-                  Icon(Icons.calendar_today,
-                      size: 16, color: Colors.grey[600]),
+                  Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 8),
                   Text(
                     'Pulang: ${DateFormat('dd/MM/yyyy').format(izin.tanggalPulang)}',
@@ -359,7 +377,8 @@ class _HomePengurusState extends State<HomePengurus> {
               if (izin.fotoBase64 != null) ...[
                 const SizedBox(height: 8),
                 InkWell(
-                  onTap: () => _showFotoDetail(izin.namaSantri, izin.fotoBase64!),
+                  onTap: () =>
+                      _showFotoDetail(izin.namaSantri, izin.fotoBase64!),
                   child: Row(
                     children: [
                       const Icon(Icons.image, size: 16, color: Colors.blue),
@@ -367,13 +386,33 @@ class _HomePengurusState extends State<HomePengurus> {
                       Text(
                         'Lihat Foto Bukti',
                         style: TextStyle(
-                          fontSize: 13, 
+                          fontSize: 13,
                           color: Colors.blue[700],
                           decoration: TextDecoration.underline,
                         ),
                       ),
                     ],
                   ),
+                ),
+              ],
+              // Tampilkan nama keamanan yang mengizinkan
+              if (izin.namaKeamananIzin != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.person, size: 16, color: Colors.teal[600]),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Diizinkan: ${izin.namaKeamananIzin}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.teal[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
               const SizedBox(height: 12),
@@ -464,7 +503,6 @@ class _HomePengurusState extends State<HomePengurus> {
                 Navigator.pop(context);
               },
             ),
-
             const Divider(),
             ListTile(
               leading: const Icon(Icons.exit_to_app, color: Colors.red),
@@ -479,6 +517,111 @@ class _HomePengurusState extends State<HomePengurus> {
       ),
       body: Column(
         children: [
+          // Statistics Cards
+          StreamBuilder<List<IzinPulang>>(
+            stream: _izinService.getSemuaIzinPulang(),
+            builder: (context, snapshot) {
+              int santriPulang = 0;
+              int santriKembali = 0;
+
+              if (snapshot.hasData) {
+                for (var izin in snapshot.data!) {
+                  if (izin.status == 'Disetujui') {
+                    if (izin.sudahKembali) {
+                      santriKembali++;
+                    } else {
+                      santriPulang++;
+                    }
+                  }
+                }
+              }
+
+              return Container(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    // Card Santri Pulang
+                    Expanded(
+                      child: Card(
+                        color: Colors.orange.shade50,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: Colors.orange.shade200),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              Icon(Icons.directions_walk,
+                                  size: 32, color: Colors.orange[700]),
+                              const SizedBox(height: 8),
+                              Text(
+                                '$santriPulang',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange[800],
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Santri Pulang',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.orange[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Card Santri Kembali
+                    Expanded(
+                      child: Card(
+                        color: Colors.green.shade50,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: Colors.green.shade200),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              Icon(Icons.home,
+                                  size: 32, color: Colors.green[700]),
+                              const SizedBox(height: 8),
+                              Text(
+                                '$santriKembali',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green[800],
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Santri Kembali',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.green[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
           // List Izin
           Expanded(
             child: StreamBuilder<List<IzinPulang>>(

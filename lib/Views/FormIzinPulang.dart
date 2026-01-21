@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:perizinan_santri/models/izin_pulang.dart';
 import 'package:perizinan_santri/services/izin_service.dart';
+import 'package:perizinan_santri/services/auth_service.dart';
 
 class FormIzinPulang extends StatefulWidget {
   const FormIzinPulang({super.key});
@@ -24,9 +25,13 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
 
   // Service untuk Firestore
   final IzinService _izinService = IzinService();
-  
+  final AuthService _authService = AuthService();
+
   // State untuk loading
   bool _isLoading = false;
+
+  // Nama keamanan yang login
+  String _namaKeamanan = 'Petugas Keamanan';
 
   // Image picker
   final ImagePicker _picker = ImagePicker();
@@ -36,8 +41,28 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
   // Tanggal pulang
   DateTime? _tanggalPulang;
 
-  // Taggal kembali 
+  // Taggal kembali
   DateTime? _tanggalKembali;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  // Load profil user
+  Future<void> _loadUserProfile() async {
+    try {
+      final profile = await _authService.getUserProfile();
+      if (profile != null && profile['name'] != null && mounted) {
+        setState(() {
+          _namaKeamanan = profile['name'];
+        });
+      }
+    } catch (e) {
+      // Ignore error, use default name
+    }
+  }
 
   @override
   void dispose() {
@@ -83,7 +108,8 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
 
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _tanggalKembali ?? _tanggalPulang!.add(const Duration(days: 1)),
+      initialDate:
+          _tanggalKembali ?? _tanggalPulang!.add(const Duration(days: 1)),
       firstDate: _tanggalPulang!, // Minimal setelah tanggal pulang
       lastDate: DateTime.now().add(const Duration(days: 365)),
       helpText: 'Pilih Tanggal Kembali',
@@ -119,13 +145,12 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
 
       try {
         String? fotoBase64;
-        
+
         // Konversi foto ke base64 jika ada
         if (_selectedImage != null && _selectedImageBytes != null) {
           fotoBase64 = base64Encode(_selectedImageBytes!);
-
         }
-        
+
         // Buat object IzinPulang dari form
         final izinBaru = IzinPulang(
           namaSantri: _namaController.text.trim(),
@@ -138,6 +163,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
           tanggalPulang: _tanggalPulang!,
           tanggalKembali: _tanggalKembali,
           fotoBase64: fotoBase64,
+          namaKeamananIzin: _namaKeamanan,
         );
 
         // Simpan ke Firestore
@@ -200,7 +226,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
         maxHeight: 800,
         imageQuality: 50,
       );
-      
+
       // const photo = null; // DISABLED FOR DEBUG
 
       if (photo != null) {
@@ -209,7 +235,7 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
           _selectedImage = photo;
           _selectedImageBytes = bytes;
         });
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -469,7 +495,8 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
                 ),
                 child: Column(
                   children: [
-                    if (_selectedImage != null && _selectedImageBytes != null) ...[
+                    if (_selectedImage != null &&
+                        _selectedImageBytes != null) ...[
                       // Preview foto yang diambil
                       Stack(
                         children: [
@@ -500,7 +527,8 @@ class _FormIzinPulangState extends State<FormIzinPulang> {
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.check_circle, color: Colors.green, size: 20),
+                          Icon(Icons.check_circle,
+                              color: Colors.green, size: 20),
                           SizedBox(width: 8),
                           Text(
                             'Foto berhasil diambil',

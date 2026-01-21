@@ -12,13 +12,18 @@ class IzinPulang {
   final DateTime tanggalPulang;
   final DateTime? tanggalKembali; // Rencana tanggal kembali
   final DateTime createdAt;
-  
+
   // Field baru untuk verifikasi kembali
   final bool sudahKembali;
   final DateTime? tanggalVerifikasiKembali; // Tanggal aktual santri kembali
-  
+  final String?
+      namaKeamananVerifikasi; // Nama keamanan yang memverifikasi kembali
+
   // Field untuk foto bukti
   final String? fotoBase64;
+
+  // Field untuk nama keamanan yang mengizinkan pulang
+  final String? namaKeamananIzin;
 
   IzinPulang({
     this.id,
@@ -34,7 +39,9 @@ class IzinPulang {
     DateTime? createdAt,
     this.sudahKembali = false,
     this.tanggalVerifikasiKembali,
+    this.namaKeamananVerifikasi,
     this.fotoBase64,
+    this.namaKeamananIzin,
   }) : createdAt = createdAt ?? DateTime.now();
 
   // Cek apakah santri terlambat kembali
@@ -50,7 +57,9 @@ class IzinPulang {
       tanggalKembali!.year,
       tanggalKembali!.month,
       tanggalKembali!.day,
-      23, 59, 59,
+      23,
+      59,
+      59,
     );
     return now.isAfter(batasKembali);
   }
@@ -71,14 +80,16 @@ class IzinPulang {
       tanggalKembali: data['tanggalKembali'] != null
           ? (data['tanggalKembali'] as Timestamp).toDate()
           : null,
-      createdAt: data['createdAt'] != null 
+      createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
       sudahKembali: data['sudahKembali'] ?? false,
       tanggalVerifikasiKembali: data['tanggalVerifikasiKembali'] != null
           ? (data['tanggalVerifikasiKembali'] as Timestamp).toDate()
           : null,
+      namaKeamananVerifikasi: data['namaKeamananVerifikasi'],
       fotoBase64: data['fotoBase64'],
+      namaKeamananIzin: data['namaKeamananIzin'],
     );
   }
 
@@ -97,10 +108,12 @@ class IzinPulang {
           tanggalKembali != null ? Timestamp.fromDate(tanggalKembali!) : null,
       'createdAt': Timestamp.fromDate(createdAt),
       'sudahKembali': sudahKembali,
-      'tanggalVerifikasiKembali': tanggalVerifikasiKembali != null 
-          ? Timestamp.fromDate(tanggalVerifikasiKembali!) 
+      'tanggalVerifikasiKembali': tanggalVerifikasiKembali != null
+          ? Timestamp.fromDate(tanggalVerifikasiKembali!)
           : null,
+      'namaKeamananVerifikasi': namaKeamananVerifikasi,
       'fotoBase64': fotoBase64,
+      'namaKeamananIzin': namaKeamananIzin,
     };
   }
 
@@ -118,7 +131,9 @@ class IzinPulang {
     DateTime? createdAt,
     bool? sudahKembali,
     DateTime? tanggalVerifikasiKembali,
+    String? namaKeamananVerifikasi,
     String? fotoBase64,
+    String? namaKeamananIzin,
   }) {
     return IzinPulang(
       id: id ?? this.id,
@@ -132,8 +147,12 @@ class IzinPulang {
       tanggalKembali: tanggalKembali ?? this.tanggalKembali,
       createdAt: createdAt ?? this.createdAt,
       sudahKembali: sudahKembali ?? this.sudahKembali,
-      tanggalVerifikasiKembali: tanggalVerifikasiKembali ?? this.tanggalVerifikasiKembali,
+      tanggalVerifikasiKembali:
+          tanggalVerifikasiKembali ?? this.tanggalVerifikasiKembali,
+      namaKeamananVerifikasi:
+          namaKeamananVerifikasi ?? this.namaKeamananVerifikasi,
       fotoBase64: fotoBase64 ?? this.fotoBase64,
+      namaKeamananIzin: namaKeamananIzin ?? this.namaKeamananIzin,
     );
   }
 

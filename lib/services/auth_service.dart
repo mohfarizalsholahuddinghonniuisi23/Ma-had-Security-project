@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   // Koneksi ke Firebase Authentication
@@ -21,8 +22,6 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-
-
     try {
       // Minta Firebase untuk cek email & password
       final credential = await _auth.signInWithEmailAndPassword(
@@ -30,12 +29,8 @@ class AuthService {
         password: password,
       );
 
-
-
       return credential;
     } on FirebaseAuthException catch (e) {
-
-
       // Terjemahkan pesan error ke Bahasa Indonesia
       String pesanError;
       switch (e.code) {
@@ -60,7 +55,6 @@ class AuthService {
       throw Exception(pesanError);
     } catch (e) {
       // Tangkap error lainnya (untuk Flutter Web)
-
 
       String errorString = e.toString().toLowerCase();
 
@@ -88,20 +82,14 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-
-
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-
-
       return credential;
     } on FirebaseAuthException catch (e) {
-
-
       String pesanError;
       switch (e.code) {
         case 'weak-password':
@@ -124,10 +112,45 @@ class AuthService {
   // LOGOUT: Keluar dari Aplikasi
   // ═══════════════════════════════════════════════════════════
   Future<void> logout() async {
-
-
     await _auth.signOut();
+  }
 
+  // ═══════════════════════════════════════════════════════════
+  // GET USER PROFILE: Ambil profil user dari Firestore
+  // ═══════════════════════════════════════════════════════════
+  Future<Map<String, dynamic>?> getUserProfile() async {
+    final user = _auth.currentUser;
+    if (user == null) return null;
 
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (doc.exists) {
+        return doc.data();
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Gagal mengambil profil: $e');
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // UPDATE USER PROFILE: Update nama profil user
+  // ═══════════════════════════════════════════════════════════
+  Future<void> updateUserProfile(String name) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User tidak ditemukan');
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'name': name});
+    } catch (e) {
+      throw Exception('Gagal update profil: $e');
+    }
   }
 }
